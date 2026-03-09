@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0a0c"/>
+  <circle cx="600" cy="315" r="200" fill="none" stroke="#00e5a030" stroke-width="1"/>
+  <circle cx="600" cy="315" r="140" fill="none" stroke="#00e5a040" stroke-width="1"/>
+  <circle cx="600" cy="315" r="80" fill="none" stroke="#00e5a060" stroke-width="1"/>
+  <circle cx="600" cy="315" r="20" fill="#00e5a0"/>
+  <text x="600" y="280" text-anchor="middle" font-family="monospace" font-size="48" font-weight="700" fill="#00e5a0" letter-spacing="4">APES_</text>
+  <text x="600" y="380" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#8888a0">From detection to response. One platform. Fully autonomous.</text>
+</svg>
