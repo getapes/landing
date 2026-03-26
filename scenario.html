@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APES — How It Works</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --apes-black: #06080a;
+  --apes-dark: #0b0d10;
+  --apes-card: #12141a;
+  --apes-border: #1e2028;
+  --apes-accent: #00e5a0;
+  --apes-accent-mid: #00e5a045;
+  --apes-blue: #3d8bfd;
+  --apes-amber: #ffb84d;
+  --apes-red: #ff4d6a;
+  --apes-text: #e8e8ec;
+  --apes-muted: #6a6a80;
+  --apes-mono: 'JetBrains Mono', monospace;
+  --apes-sans: 'Sora', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--apes-sans);background:var(--apes-black);color:var(--apes-text);-webkit-font-smoothing:antialiased;overflow:hidden}
+.accent{color:var(--apes-accent)}
+
+/* Scanline overlay */
+body::after{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+}
+
+/* Vignette */
+body::before{
+  content:'';position:fixed;inset:0;z-index:9997;pointer-events:none;
+  background:radial-gradient(ellipse 70% 70% at 50% 50%,transparent 50%,rgba(6,8,10,0.6) 100%);
+}
+
+.slider-viewport{height:100vh;overflow:hidden;position:relative}
+.slider-wrapper{transition:transform 0.85s cubic-bezier(0.65,0,0.35,1);will-change:transform}
+.slide{height:100vh;position:relative;overflow:hidden;background:var(--apes-black)}
+.slide-iso{position:absolute;inset:0}
+.slide-iso svg{width:100%;height:100%;display:block}
+
+/* Panel */
+.slide-panel{
+  position:absolute;width:400px;max-width:calc(100% - 3rem);
+  background:rgba(8,10,14,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(0,229,160,0.08);border-radius:4px;padding:2rem 1.8rem;z-index:10;
+}
+.slide-panel::before{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;border-radius:4px 0 0 4px}
+.slide-panel::after{
+  content:'';position:absolute;top:-1px;left:-1px;right:-1px;bottom:-1px;border-radius:4px;
+  pointer-events:none;z-index:-1;
+}
+.slide-panel.pos-top-right{top:5vh;right:4vw}
+.slide-panel.pos-bottom-right{bottom:5vh;right:4vw}
+
+/* Panel inner glow per theme */
+.theme-scan .slide-panel{border-color:rgba(0,229,160,0.1);box-shadow:0 0 40px rgba(0,229,160,0.03) inset}
+.theme-scan .slide-panel::before{background:var(--apes-accent)}
+.theme-detect .slide-panel{border-color:rgba(255,184,77,0.1);box-shadow:0 0 40px rgba(255,184,77,0.03) inset}
+.theme-detect .slide-panel::before{background:var(--apes-amber)}
+.theme-classify .slide-panel{border-color:rgba(61,139,253,0.1);box-shadow:0 0 40px rgba(61,139,253,0.03) inset}
+.theme-classify .slide-panel::before{background:var(--apes-blue)}
+.theme-intercept .slide-panel{border-color:rgba(0,229,160,0.1);box-shadow:0 0 40px rgba(0,229,160,0.03) inset}
+.theme-intercept .slide-panel::before{background:var(--apes-accent)}
+.theme-neutralise .slide-panel{border-color:rgba(0,229,160,0.12);box-shadow:0 0 40px rgba(0,229,160,0.04) inset}
+.theme-neutralise .slide-panel::before{background:var(--apes-accent)}
+
+.panel-phase-badge{
+  font-family:var(--apes-mono);font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;
+  padding:4px 10px;border-radius:2px;border:1px solid;display:inline-flex;align-items:center;gap:0.5rem;margin-bottom:1.2rem;
+}
+.panel-dot{width:5px;height:5px;border-radius:50%;animation:dotPulse 2s infinite}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:0.25}}
+
+.theme-scan .panel-phase-badge{color:var(--apes-accent);border-color:var(--apes-accent-mid)}
+.theme-scan .panel-dot{background:var(--apes-accent)}
+.theme-detect .panel-phase-badge{color:var(--apes-amber);border-color:rgba(255,184,77,0.25)}
+.theme-detect .panel-dot{background:var(--apes-amber)}
+.theme-classify .panel-phase-badge{color:var(--apes-blue);border-color:rgba(61,139,253,0.25)}
+.theme-classify .panel-dot{background:var(--apes-blue)}
+.theme-intercept .panel-phase-badge,.theme-neutralise .panel-phase-badge{color:var(--apes-accent);border-color:var(--apes-accent-mid)}
+.theme-intercept .panel-dot,.theme-neutralise .panel-dot{background:var(--apes-accent)}
+
+.panel-counter{font-family:var(--apes-mono);font-size:0.55rem;letter-spacing:0.12em;color:var(--apes-muted);margin-bottom:0.5rem}
+.panel-title{font-size:1.4rem;font-weight:700;line-height:1.2;margin-bottom:0.9rem}
+.panel-desc{font-size:0.88rem;color:var(--apes-muted);line-height:1.7;margin-bottom:1.2rem}
+.panel-detail{
+  font-family:var(--apes-mono);font-size:0.68rem;line-height:1.85;padding:0.85rem 1rem;
+  background:rgba(6,8,10,0.7);border:1px solid var(--apes-border);border-radius:3px;color:var(--apes-muted);
+}
+.panel-detail strong{color:var(--apes-text)}
+
+/* HUD corners on panel */
+.hud-corner{position:absolute;width:12px;height:12px;pointer-events:none}
+.hud-corner.tl{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid}
+.hud-corner.tr{top:-1px;right:-1px;border-top:2px solid;border-right:2px solid}
+.hud-corner.bl{bottom:-1px;left:-1px;border-bottom:2px solid;border-left:2px solid}
+.hud-corner.br{bottom:-1px;right:-1px;border-bottom:2px solid;border-right:2px solid}
+.theme-scan .hud-corner{border-color:var(--apes-accent)}
+.theme-detect .hud-corner{border-color:var(--apes-amber)}
+.theme-classify .hud-corner{border-color:var(--apes-blue)}
+.theme-intercept .hud-corner,.theme-neutralise .hud-corner{border-color:var(--apes-accent)}
+
+/* Nav dots */
+.slide-nav{position:fixed;right:20px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:100}
+.nav-dot{
+  width:8px;height:8px;border-radius:50%;border:1.5px solid var(--apes-border);
+  background:transparent;cursor:pointer;transition:all 0.3s;position:relative;
+}
+.nav-dot:hover{border-color:var(--apes-muted)}
+.nav-dot.active{border-color:var(--apes-accent);background:var(--apes-accent);box-shadow:0 0 12px rgba(0,229,160,0.4)}
+.nav-dot[data-i="1"].active{border-color:var(--apes-amber);background:var(--apes-amber);box-shadow:0 0 12px rgba(255,184,77,0.4)}
+.nav-dot[data-i="2"].active{border-color:var(--apes-blue);background:var(--apes-blue);box-shadow:0 0 12px rgba(61,139,253,0.4)}
+.nav-dot::before{
+  content:attr(data-label);position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-family:var(--apes-mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--apes-muted);white-space:nowrap;opacity:0;transition:opacity 0.3s;pointer-events:none;
+  padding:3px 8px;background:var(--apes-card);border:1px solid var(--apes-border);border-radius:2px;
+}
+.nav-dot:hover::before{opacity:1}
+
+/* Status bar */
+.slide-status{
+  position:absolute;bottom:20px;left:20px;display:flex;align-items:center;gap:8px;
+  font-family:var(--apes-mono);font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:8px 14px;background:rgba(6,8,10,0.88);border:1px solid var(--apes-border);
+  border-radius:2px;backdrop-filter:blur(8px);z-index:10;
+}
+.status-dot{width:5px;height:5px;border-radius:50%;animation:dotPulse 1.5s infinite}
+.scroll-hint{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:var(--apes-mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--apes-muted);opacity:0.4;z-index:100;display:flex;flex-direction:column;align-items:center;gap:5px;transition:opacity 0.5s;
+}
+.scroll-arrow{
+  width:12px;height:12px;border-right:1.5px solid var(--apes-muted);border-bottom:1.5px solid var(--apes-muted);
+  transform:rotate(45deg);animation:scrollBob 2s infinite;
+}
+@keyframes scrollBob{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(4px)}}
+
+/* HUD timestamp top-left */
+.hud-time{
+  position:absolute;top:16px;left:16px;font-family:var(--apes-mono);font-size:0.55rem;
+  letter-spacing:0.12em;color:var(--apes-muted);opacity:0.4;z-index:10;
+}
+
+/* HUD crosshair center-ish on threat */
+@keyframes crosshairSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .slide-panel{width:calc(100% - 2rem);left:1rem !important;right:1rem !important;top:auto !important;bottom:8vh !important;padding:1.5rem}
+  .panel-title{font-size:1.1rem}
+  .slide-nav{right:10px;gap:10px}
+  .nav-dot::before{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Back to main site -->
+<a href="index.html" style="position:fixed;top:16px;left:16px;z-index:200;font-family:var(--apes-mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--apes-accent);text-decoration:none;padding:6px 12px;border:1px solid rgba(0,229,160,0.15);border-radius:2px;background:rgba(6,8,10,0.85);backdrop-filter:blur(12px);transition:all 0.3s;display:flex;align-items:center;gap:0.4rem" onmouseover="this.style.borderColor='rgba(0,229,160,0.4)'" onmouseout="this.style.borderColor='rgba(0,229,160,0.15)'">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2L4 8l6 6"/></svg>
+  APES_
+</a>
+
+<div class="slide-nav">
+  <div class="nav-dot active" data-i="0" data-label="Scanning"></div>
+  <div class="nav-dot" data-i="1" data-label="Detection"></div>
+  <div class="nav-dot" data-i="2" data-label="Classification"></div>
+  <div class="nav-dot" data-i="3" data-label="Interception"></div>
+  <div class="nav-dot" data-i="4" data-label="Neutralised"></div>
+</div>
+<div class="scroll-hint" id="scrollHint">Scroll to explore<div class="scroll-arrow"></div></div>
+
+<div class="slider-viewport" id="viewport">
+<div class="slider-wrapper" id="wrapper">
+
+<!-- ═══════════════════════════════════════════
+     SVG DEFS — shared filters for all slides
+     ═══════════════════════════════════════════ -->
+
+<!-- ═══ SLIDE 1: SCAN ═══ -->
+<div class="slide theme-scan">
+  <div class="hud-time">APES // LIVE FEED // <span id="hudTime1">14:22:58</span></div>
+  <div class="slide-iso">
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Glow filter -->
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glowRed" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Ground gradient -->
+        <radialGradient id="groundGlow" cx="420" cy="370" r="350" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.03"/>
+          <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Ambient ground glow -->
+      <ellipse cx="420" cy="370" rx="380" ry="260" fill="url(#groundGlow)"/>
+
+      <!-- Ground plane -->
+      <polygon points="420,130 850,380 420,630 -10,380" fill="none" stroke="#00e5a0" stroke-width="0.5" opacity="0.08"/>
+      <line x1="420" y1="130" x2="420" y2="630" stroke="#00e5a0" stroke-width="0.3" opacity="0.05"/>
+      <line x1="-10" y1="380" x2="850" y2="380" stroke="#00e5a0" stroke-width="0.3" opacity="0.05"/>
+
+      <!-- ═══ BUILDINGS — brighter, tactical feel ═══ -->
+      <!-- Main building -->
+      <polygon points="395,330 445,305 495,330 445,355" fill="#0d1f16" stroke="#00e5a0" stroke-width="1.2" filter="url(#softGlow)"/>
+      <polygon points="395,330 395,378 445,403 445,355" fill="#091510" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="495,330 495,378 445,403 445,355" fill="#070f0b" stroke="#00e5a0" stroke-width="0.8"/>
+      <!-- Roof edge glow -->
+      <line x1="395" y1="330" x2="445" y2="305" stroke="#00e5a0" stroke-width="1.5" opacity="0.4" filter="url(#softGlow)"/>
+      <line x1="445" y1="305" x2="495" y2="330" stroke="#00e5a0" stroke-width="1.5" opacity="0.4" filter="url(#softGlow)"/>
+      <text x="445" y="347" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.7" letter-spacing="1">MAIN</text>
+
+      <!-- Secondary building -->
+      <polygon points="340,365 378,347 416,365 378,383" fill="#0d1f16" stroke="#00e5a0" stroke-width="1" filter="url(#softGlow)"/>
+      <polygon points="340,365 340,392 378,410 378,383" fill="#091510" stroke="#00e5a0" stroke-width="0.7"/>
+      <polygon points="416,365 416,392 378,410 378,383" fill="#070f0b" stroke="#00e5a0" stroke-width="0.7"/>
+      <line x1="340" y1="365" x2="378" y2="347" stroke="#00e5a0" stroke-width="1.2" opacity="0.35" filter="url(#softGlow)"/>
+      <line x1="378" y1="347" x2="416" y2="365" stroke="#00e5a0" stroke-width="1.2" opacity="0.35" filter="url(#softGlow)"/>
+
+      <!-- Storage -->
+      <polygon points="475,358 508,342 541,358 508,374" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.9" filter="url(#softGlow)"/>
+      <polygon points="475,358 475,382 508,398 508,374" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="541,358 541,382 508,398 508,374" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <text x="508" y="412" text-anchor="middle" font-family="var(--apes-mono)" font-size="5" fill="#00e5a0" opacity="0.4" letter-spacing="0.8">STORAGE</text>
+
+      <!-- Substation -->
+      <polygon points="365,402 385,392 405,402 385,412" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="365,402 365,418 385,428 385,412" fill="#091510" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="405,402 405,418 385,428 385,412" fill="#070f0b" stroke="#00e5a0" stroke-width="0.5"/>
+      <text x="385" y="440" text-anchor="middle" font-family="var(--apes-mono)" font-size="4.5" fill="#00e5a0" opacity="0.3" letter-spacing="0.5">SUB</text>
+
+      <!-- ═══ RADARS — with glow ═══ -->
+      <circle cx="370" cy="308" r="4" fill="#00e5a0" opacity="0.7" filter="url(#glow)"><animate attributeName="r" values="3;6;3" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="370" cy="308" r="20" fill="none" stroke="#00e5a0" stroke-width="0.4" opacity="0.08"><animate attributeName="r" values="14;30;14" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.08;0;0.08" dur="2s" repeatCount="indefinite"/></circle>
+      <text x="370" y="296" text-anchor="middle" font-family="var(--apes-mono)" font-size="5" fill="#00e5a0" opacity="0.4">RF</text>
+
+      <circle cx="522" cy="322" r="4" fill="#00e5a0" opacity="0.7" filter="url(#glow)"><animate attributeName="r" values="3;6;3" dur="2.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.3s" repeatCount="indefinite"/></circle>
+      <circle cx="522" cy="322" r="20" fill="none" stroke="#00e5a0" stroke-width="0.4" opacity="0.08"><animate attributeName="r" values="14;30;14" dur="2.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.08;0;0.08" dur="2.3s" repeatCount="indefinite"/></circle>
+      <text x="522" y="310" text-anchor="middle" font-family="var(--apes-mono)" font-size="5" fill="#00e5a0" opacity="0.4">OPT</text>
+
+      <circle cx="432" cy="432" r="4" fill="#00e5a0" opacity="0.7" filter="url(#glow)"><animate attributeName="r" values="3;6;3" dur="1.8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.8s" repeatCount="indefinite"/></circle>
+      <text x="432" y="448" text-anchor="middle" font-family="var(--apes-mono)" font-size="5" fill="#00e5a0" opacity="0.4">THR</text>
+
+      <circle cx="308" cy="378" r="4" fill="#00e5a0" opacity="0.7" filter="url(#glow)"><animate attributeName="r" values="3;6;3" dur="2.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.5s" repeatCount="indefinite"/></circle>
+      <text x="308" y="366" text-anchor="middle" font-family="var(--apes-mono)" font-size="5" fill="#00e5a0" opacity="0.4">RAD</text>
+
+      <!-- Sweep -->
+      <line x1="420" y1="370" x2="720" y2="240" stroke="#00e5a0" stroke-width="0.6" opacity="0.15" filter="url(#softGlow)">
+        <animateTransform attributeName="transform" type="rotate" from="0 420 370" to="360 420 370" dur="6s" repeatCount="indefinite"/>
+      </line>
+
+      <!-- HUD frame marks -->
+      <line x1="10" y1="10" x2="60" y2="10" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="10" y1="10" x2="10" y2="40" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="1190" y1="10" x2="1140" y2="10" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="1190" y1="10" x2="1190" y2="40" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="10" y1="690" x2="60" y2="690" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="10" y1="690" x2="10" y2="660" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+    </svg>
+  </div>
+  <div class="slide-status"><div class="status-dot" style="background:var(--apes-accent)"></div><span style="color:var(--apes-accent)">System active — scanning all sectors</span></div>
+  <div class="slide-panel pos-top-right">
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>
+    <div class="panel-phase-badge"><div class="panel-dot"></div> Sense</div>
+    <div class="panel-counter">Phase 1 of 5</div>
+    <h2 class="panel-title">Continuous airspace scanning</h2>
+    <p class="panel-desc">Multi-sensor array monitors all perimeters 24/7. RF, optical, thermal, and radar data fused into a single unified stream. Hardware-agnostic — any brand, any configuration.</p>
+    <div class="panel-detail"><strong>Sensors:</strong> Any brand, any type<br><strong>Coverage:</strong> Full perimeter, no gaps<br><strong>Output:</strong> Normalised unified data stream</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 2: DETECT ═══ -->
+<div class="slide theme-detect">
+  <div class="hud-time">APES // ALERT // <span id="hudTime2">14:23:01</span></div>
+  <div class="slide-iso">
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glowRed2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="softGlow2" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="alertGlow" cx="130" cy="180" r="200" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#ff4d6a" stop-opacity="0.06"/>
+          <stop offset="100%" stop-color="#ff4d6a" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="groundGlow2" cx="420" cy="370" r="350" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.02"/>
+          <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <ellipse cx="420" cy="370" rx="380" ry="260" fill="url(#groundGlow2)"/>
+      <ellipse cx="130" cy="180" rx="200" ry="200" fill="url(#alertGlow)"/>
+
+      <polygon points="420,130 850,380 420,630 -10,380" fill="none" stroke="#00e5a0" stroke-width="0.5" opacity="0.06"/>
+      <!-- Buildings (identical, slightly dimmed) -->
+      <polygon points="395,330 445,305 495,330 445,355" fill="#0d1f16" stroke="#00e5a0" stroke-width="1" filter="url(#softGlow2)"/>
+      <polygon points="395,330 395,378 445,403 445,355" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="495,330 495,378 445,403 445,355" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <line x1="395" y1="330" x2="445" y2="305" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow2)"/>
+      <line x1="445" y1="305" x2="495" y2="330" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow2)"/>
+      <text x="445" y="347" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.5" letter-spacing="1">MAIN</text>
+      <polygon points="340,365 378,347 416,365 378,383" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.9"/>
+      <polygon points="340,365 340,392 378,410 378,383" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="416,365 416,392 378,410 378,383" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="475,358 508,342 541,358 508,374" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="475,358 475,382 508,398 508,374" fill="#091510" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="541,358 541,382 508,398 508,374" fill="#070f0b" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="365,402 385,392 405,402 385,412" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="365,402 365,418 385,428 385,412" fill="#091510" stroke="#00e5a0" stroke-width="0.4"/>
+      <polygon points="405,402 405,418 385,428 385,412" fill="#070f0b" stroke="#00e5a0" stroke-width="0.4"/>
+      <!-- Radars dimmed -->
+      <circle cx="370" cy="308" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="522" cy="322" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.3s" repeatCount="indefinite"/></circle>
+      <circle cx="432" cy="432" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="1.8s" repeatCount="indefinite"/></circle>
+      <circle cx="308" cy="378" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.5s" repeatCount="indefinite"/></circle>
+
+      <!-- ═══ THREAT — NW approach with heavy glow ═══ -->
+      <circle cx="130" cy="180" r="8" fill="#ff4d6a" opacity="0.95" filter="url(#glowRed2)"><animate attributeName="opacity" values="0.6;1;0.6" dur="0.7s" repeatCount="indefinite"/></circle>
+      <circle cx="130" cy="180" r="26" fill="none" stroke="#ff4d6a" stroke-width="1.5" opacity="0.5"><animate attributeName="r" values="16;44;16" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0;0.5" dur="1.5s" repeatCount="indefinite"/></circle>
+      <circle cx="130" cy="180" r="42" fill="none" stroke="#ff4d6a" stroke-width="0.6" opacity="0.15"><animate attributeName="r" values="35;65;35" dur="1.5s" repeatCount="indefinite" begin="0.4s"/><animate attributeName="opacity" values="0.15;0;0.15" dur="1.5s" repeatCount="indefinite" begin="0.4s"/></circle>
+      <text x="130" y="158" text-anchor="middle" font-family="var(--apes-mono)" font-size="8" fill="#ff4d6a" letter-spacing="1" opacity="0.9" filter="url(#softGlow2)">UNIDENTIFIED</text>
+      <!-- Flight path -->
+      <line x1="130" y1="180" x2="430" y2="350" stroke="#ff4d6a" stroke-width="1" stroke-dasharray="8 6" opacity="0.25"/>
+      <!-- Speed arrow -->
+      <line x1="135" y1="185" x2="165" y2="210" stroke="#ff4d6a" stroke-width="2" opacity="0.5"/>
+      <polygon points="168,205 173,218 160,213" fill="#ff4d6a" opacity="0.5"/>
+
+      <!-- HUD frame -->
+      <line x1="10" y1="10" x2="60" y2="10" stroke="#ff4d6a" stroke-width="0.5" opacity="0.2"/>
+      <line x1="10" y1="10" x2="10" y2="40" stroke="#ff4d6a" stroke-width="0.5" opacity="0.2"/>
+    </svg>
+  </div>
+  <div class="slide-status"><div class="status-dot" style="background:var(--apes-amber)"></div><span style="color:var(--apes-amber)">Alert — unidentified object detected</span></div>
+  <div class="slide-panel pos-bottom-right">
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>
+    <div class="panel-phase-badge"><div class="panel-dot"></div> Sense</div>
+    <div class="panel-counter">Phase 2 of 5</div>
+    <h2 class="panel-title">FPV drone detected approaching facility</h2>
+    <p class="panel-desc">An unidentified object appears on the sensor array. Small, fast, no transponder. Sensor fusion confirms aerial target — alert triggered, object tracked in real time.</p>
+    <div class="panel-detail"><strong>Object:</strong> Small UAV, no transponder<br><strong>Speed:</strong> High velocity, erratic vector<br><strong>Confidence:</strong> Multi-sensor confirmed</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3: CLASSIFY ═══ -->
+<div class="slide theme-classify">
+  <div class="hud-time">APES // CLASSIFY // <span id="hudTime3">14:23:03</span></div>
+  <div class="slide-iso">
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glowBlue3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="softGlow3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="groundGlow3" cx="420" cy="370" r="350" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#00e5a0" stop-opacity="0.02"/><stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="420" cy="370" rx="380" ry="260" fill="url(#groundGlow3)"/>
+      <polygon points="420,130 850,380 420,630 -10,380" fill="none" stroke="#00e5a0" stroke-width="0.5" opacity="0.06"/>
+      <!-- Buildings -->
+      <polygon points="395,330 445,305 495,330 445,355" fill="#0d1f16" stroke="#00e5a0" stroke-width="1" filter="url(#softGlow3)"/>
+      <polygon points="395,330 395,378 445,403 445,355" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="495,330 495,378 445,403 445,355" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <line x1="395" y1="330" x2="445" y2="305" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow3)"/>
+      <line x1="445" y1="305" x2="495" y2="330" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow3)"/>
+      <text x="445" y="347" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.5" letter-spacing="1">MAIN</text>
+      <polygon points="340,365 378,347 416,365 378,383" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.9"/>
+      <polygon points="340,365 340,392 378,410 378,383" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="416,365 416,392 378,410 378,383" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="475,358 508,342 541,358 508,374" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="475,358 475,382 508,398 508,374" fill="#091510" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="541,358 541,382 508,398 508,374" fill="#070f0b" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="365,402 385,392 405,402 385,412" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="365,402 365,418 385,428 385,412" fill="#091510" stroke="#00e5a0" stroke-width="0.4"/>
+      <polygon points="405,402 405,418 385,428 385,412" fill="#070f0b" stroke="#00e5a0" stroke-width="0.4"/>
+      <circle cx="370" cy="308" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="522" cy="322" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.3s" repeatCount="indefinite"/></circle>
+      <circle cx="432" cy="432" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="1.8s" repeatCount="indefinite"/></circle>
+      <circle cx="308" cy="378" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.5s" repeatCount="indefinite"/></circle>
+
+      <!-- Threat — classified, with blue targeting rings -->
+      <circle cx="230" cy="255" r="7" fill="#ff4d6a" opacity="0.85" filter="url(#glow3)"><animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite"/></circle>
+      <circle cx="230" cy="255" r="22" fill="none" stroke="#3d8bfd" stroke-width="1.5" opacity="0.5" filter="url(#glowBlue3)"><animate attributeName="r" values="18;30;18" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0.12;0.5" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="230" cy="255" r="36" fill="none" stroke="#3d8bfd" stroke-width="0.5" opacity="0.15"><animate attributeName="r" values="30;46;30" dur="2s" repeatCount="indefinite" begin="0.5s"/><animate attributeName="opacity" values="0.15;0;0.15" dur="2s" repeatCount="indefinite" begin="0.5s"/></circle>
+      <!-- Crosshair -->
+      <line x1="210" y1="255" x2="250" y2="255" stroke="#3d8bfd" stroke-width="0.6" opacity="0.4"/>
+      <line x1="230" y1="235" x2="230" y2="275" stroke="#3d8bfd" stroke-width="0.6" opacity="0.4"/>
+      <text x="230" y="232" text-anchor="middle" font-family="var(--apes-mono)" font-size="8" fill="#ff4d6a" letter-spacing="1" font-weight="600" filter="url(#softGlow3)">HOSTILE</text>
+      <line x1="230" y1="255" x2="430" y2="350" stroke="#ff4d6a" stroke-width="0.6" stroke-dasharray="5 4" opacity="0.15"/>
+    </svg>
+  </div>
+  <div class="slide-status"><div class="status-dot" style="background:var(--apes-blue)"></div><span style="color:var(--apes-blue)">Classified hostile — interception authorised</span></div>
+  <div class="slide-panel pos-top-right">
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>
+    <div class="panel-phase-badge"><div class="panel-dot"></div> Decide</div>
+    <div class="panel-counter">Phase 3 of 5</div>
+    <h2 class="panel-title">AI classifies threat as hostile FPV</h2>
+    <p class="panel-desc">Classification engine analyses flight pattern, RF signature, and size profile. Designated hostile. Policy engine evaluates jurisdiction rules and authorises active interception.</p>
+    <div class="panel-detail"><strong>Type:</strong> FPV drone, no flight plan<br><strong>Intent:</strong> Hostile — 94% confidence<br><strong>Policy:</strong> Active interception authorised</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 4: INTERCEPT ═══ -->
+<div class="slide theme-intercept">
+  <div class="hud-time">APES // INTERCEPT // <span id="hudTime4">14:23:05</span></div>
+  <div class="slide-iso">
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glow4" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="softGlow4" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="groundGlow4" cx="420" cy="370" r="350" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#00e5a0" stop-opacity="0.02"/><stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="420" cy="370" rx="380" ry="260" fill="url(#groundGlow4)"/>
+      <polygon points="420,130 850,380 420,630 -10,380" fill="none" stroke="#00e5a0" stroke-width="0.5" opacity="0.06"/>
+      <!-- Buildings -->
+      <polygon points="395,330 445,305 495,330 445,355" fill="#0d1f16" stroke="#00e5a0" stroke-width="1" filter="url(#softGlow4)"/>
+      <polygon points="395,330 395,378 445,403 445,355" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="495,330 495,378 445,403 445,355" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <line x1="395" y1="330" x2="445" y2="305" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow4)"/>
+      <line x1="445" y1="305" x2="495" y2="330" stroke="#00e5a0" stroke-width="1.2" opacity="0.3" filter="url(#softGlow4)"/>
+      <text x="445" y="347" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.5" letter-spacing="1">MAIN</text>
+      <polygon points="340,365 378,347 416,365 378,383" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.9"/>
+      <polygon points="340,365 340,392 378,410 378,383" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="416,365 416,392 378,410 378,383" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="475,358 508,342 541,358 508,374" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="475,358 475,382 508,398 508,374" fill="#091510" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="541,358 541,382 508,398 508,374" fill="#070f0b" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="365,402 385,392 405,402 385,412" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="365,402 365,418 385,428 385,412" fill="#091510" stroke="#00e5a0" stroke-width="0.4"/>
+      <polygon points="405,402 405,418 385,428 385,412" fill="#070f0b" stroke="#00e5a0" stroke-width="0.4"/>
+      <circle cx="370" cy="308" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="522" cy="322" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.3s" repeatCount="indefinite"/></circle>
+      <circle cx="432" cy="432" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="1.8s" repeatCount="indefinite"/></circle>
+      <circle cx="308" cy="378" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.5s" repeatCount="indefinite"/></circle>
+
+      <!-- Threat — closer -->
+      <circle cx="300" cy="290" r="6" fill="#ff4d6a" opacity="0.7" filter="url(#glow4)"><animate attributeName="opacity" values="0.4;0.8;0.4" dur="1s" repeatCount="indefinite"/></circle>
+      <text x="283" y="282" font-family="var(--apes-mono)" font-size="6" fill="#ff4d6a" opacity="0.5">THREAT</text>
+
+      <!-- Interceptor -->
+      <circle cx="350" cy="315" r="6" fill="#00e5a0" opacity="0.95" filter="url(#glow4)"><animate attributeName="opacity" values="0.5;1;0.5" dur="0.6s" repeatCount="indefinite"/></circle>
+      <circle cx="350" cy="315" r="18" fill="none" stroke="#00e5a0" stroke-width="0.8" opacity="0.15"><animate attributeName="r" values="12;24;12" dur="1.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.15;0;0.15" dur="1.2s" repeatCount="indefinite"/></circle>
+      <text x="350" y="340" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.7" letter-spacing="0.5">INTERCEPTOR</text>
+
+      <!-- Launch path -->
+      <line x1="430" y1="360" x2="350" y2="315" stroke="#00e5a0" stroke-width="0.7" stroke-dasharray="5 3" opacity="0.25"/>
+      <!-- Pursuit line -->
+      <line x1="350" y1="315" x2="300" y2="290" stroke="#00e5a0" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.6" filter="url(#softGlow4)"><animate attributeName="stroke-dashoffset" values="0;-10" dur="0.35s" repeatCount="indefinite"/></line>
+    </svg>
+  </div>
+  <div class="slide-status"><div class="status-dot" style="background:var(--apes-accent)"></div><span style="color:var(--apes-accent)">Interceptor en route — tracking target</span></div>
+  <div class="slide-panel pos-bottom-right">
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>
+    <div class="panel-phase-badge"><div class="panel-dot"></div> Act</div>
+    <div class="panel-counter">Phase 4 of 5</div>
+    <h2 class="panel-title">Interceptor drone dispatched</h2>
+    <p class="panel-desc">Autonomous interceptor launches from the facility. Pursuit trajectory calculated in real time. Converging on threat before it reaches the facility.</p>
+    <div class="panel-detail"><strong>Response:</strong> Autonomous interceptor<br><strong>Trajectory:</strong> Real-time computation<br><strong>Lock:</strong> Continuous multi-sensor tracking</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5: NEUTRALISE ═══ -->
+<div class="slide theme-neutralise">
+  <div class="hud-time">APES // RESOLVED // <span id="hudTime5">14:23:12</span></div>
+  <div class="slide-iso">
+    <svg viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="glowBurst" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="softGlow5" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="burstGlow" cx="310" cy="295" r="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="groundGlow5" cx="420" cy="370" r="350" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#00e5a0" stop-opacity="0.025"/><stop offset="100%" stop-color="#00e5a0" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="420" cy="370" rx="380" ry="260" fill="url(#groundGlow5)"/>
+      <ellipse cx="310" cy="295" rx="150" ry="150" fill="url(#burstGlow)"/>
+      <polygon points="420,130 850,380 420,630 -10,380" fill="none" stroke="#00e5a0" stroke-width="0.5" opacity="0.06"/>
+      <!-- Buildings — restored glow -->
+      <polygon points="395,330 445,305 495,330 445,355" fill="#0d1f16" stroke="#00e5a0" stroke-width="1.2" filter="url(#softGlow5)"/>
+      <polygon points="395,330 395,378 445,403 445,355" fill="#091510" stroke="#00e5a0" stroke-width="0.8"/>
+      <polygon points="495,330 495,378 445,403 445,355" fill="#070f0b" stroke="#00e5a0" stroke-width="0.8"/>
+      <line x1="395" y1="330" x2="445" y2="305" stroke="#00e5a0" stroke-width="1.5" opacity="0.4" filter="url(#softGlow5)"/>
+      <line x1="445" y1="305" x2="495" y2="330" stroke="#00e5a0" stroke-width="1.5" opacity="0.4" filter="url(#softGlow5)"/>
+      <text x="445" y="347" text-anchor="middle" font-family="var(--apes-mono)" font-size="6.5" fill="#00e5a0" opacity="0.65" letter-spacing="1">SECURE</text>
+      <polygon points="340,365 378,347 416,365 378,383" fill="#0d1f16" stroke="#00e5a0" stroke-width="1"/>
+      <polygon points="340,365 340,392 378,410 378,383" fill="#091510" stroke="#00e5a0" stroke-width="0.7"/>
+      <polygon points="416,365 416,392 378,410 378,383" fill="#070f0b" stroke="#00e5a0" stroke-width="0.7"/>
+      <polygon points="475,358 508,342 541,358 508,374" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.9"/>
+      <polygon points="475,358 475,382 508,398 508,374" fill="#091510" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="541,358 541,382 508,398 508,374" fill="#070f0b" stroke="#00e5a0" stroke-width="0.6"/>
+      <polygon points="365,402 385,392 405,402 385,412" fill="#0d1f16" stroke="#00e5a0" stroke-width="0.7"/>
+      <polygon points="365,402 365,418 385,428 385,412" fill="#091510" stroke="#00e5a0" stroke-width="0.5"/>
+      <polygon points="405,402 405,418 385,428 385,412" fill="#070f0b" stroke="#00e5a0" stroke-width="0.5"/>
+      <circle cx="370" cy="308" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="522" cy="322" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.3s" repeatCount="indefinite"/></circle>
+      <circle cx="432" cy="432" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="1.8s" repeatCount="indefinite"/></circle>
+      <circle cx="308" cy="378" r="3" fill="#00e5a0" opacity="0.3"><animate attributeName="r" values="2;4;2" dur="2.5s" repeatCount="indefinite"/></circle>
+
+      <!-- Burst -->
+      <circle cx="310" cy="295" r="10" fill="#00e5a0" opacity="0.35" filter="url(#glowBurst)"><animate attributeName="r" values="10;65;10" dur="3s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="310" cy="295" r="6" fill="#00e5a0" opacity="0.5" filter="url(#glowBurst)"><animate attributeName="r" values="6;38;6" dur="3s" repeatCount="indefinite" begin="0.5s"/><animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" begin="0.5s"/></circle>
+      <circle cx="310" cy="295" r="3" fill="#00e5a0" opacity="0.7"><animate attributeName="r" values="3;18;3" dur="3s" repeatCount="indefinite" begin="1s"/><animate attributeName="opacity" values="0.7;0;0.7" dur="3s" repeatCount="indefinite" begin="1s"/></circle>
+      <text x="310" y="272" text-anchor="middle" font-family="var(--apes-mono)" font-size="11" fill="#00e5a0" letter-spacing="2.5" font-weight="700" filter="url(#softGlow5)">NEUTRALISED</text>
+      <circle cx="310" cy="295" r="3" fill="#ff4d6a" opacity="0.12"/>
+
+      <!-- HUD frame -->
+      <line x1="10" y1="10" x2="60" y2="10" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+      <line x1="10" y1="10" x2="10" y2="40" stroke="#00e5a0" stroke-width="0.5" opacity="0.15"/>
+    </svg>
+  </div>
+  <div class="slide-status"><div class="status-dot" style="background:var(--apes-accent)"></div><span style="color:var(--apes-accent)">Threat neutralised — audit trail committed</span></div>
+  <div class="slide-panel pos-top-right">
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div><div class="hud-corner bl"></div><div class="hud-corner br"></div>
+    <div class="panel-phase-badge"><div class="panel-dot"></div> Act — Complete</div>
+    <div class="panel-counter">Phase 5 of 5</div>
+    <h2 class="panel-title">Threat neutralised.<br><span class="accent">Audit complete.</span></h2>
+    <p class="panel-desc">Interceptor engages and disables the hostile drone before it reaches the facility. Full event timeline written to an immutable audit trail — ready for legal, insurance, and regulatory review.</p>
+    <div class="panel-detail"><strong>Result:</strong> Threat eliminated<br><strong>Audit:</strong> Immutable log committed<br><strong>Ready for:</strong> Legal, insurance, regulatory</div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+(function() {
+  var current = 0, total = 5, locked = false;
+  var wrapper = document.getElementById('wrapper');
+  var dots = document.querySelectorAll('.nav-dot');
+  var hint = document.getElementById('scrollHint');
+
+  function go(i) {
+    if (i < 0 || i >= total || i === current || locked) return;
+    locked = true;
+    current = i;
+    wrapper.style.transform = 'translateY(-' + (current * 100) + 'vh)';
+    dots.forEach(function(d, idx) { d.classList.toggle('active', idx === current); });
+    hint.style.opacity = current > 0 ? '0' : '0.4';
+    setTimeout(function() { locked = false; }, 1000);
+  }
+
+  // Wheel — fire IMMEDIATELY on first event, ignore the rest until unlocked
+  document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    if (locked) return;
+    // Small threshold to filter tiny trackpad noise
+    if (Math.abs(e.deltaY) < 5) return;
+    go(current + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+
+  // Touch
+  var ty = 0;
+  document.addEventListener('touchstart', function(e) { ty = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    if (locked) return;
+    var d = ty - e.changedTouches[0].clientY;
+    if (Math.abs(d) > 50) go(current + (d > 0 ? 1 : -1));
+  }, { passive: true });
+
+  // Nav dots
+  dots.forEach(function(d) { d.addEventListener('click', function() { go(+this.getAttribute('data-i')); }); });
+
+  // Keys
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); go(current + 1); }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); go(current - 1); }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>

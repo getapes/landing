@@ -3,43 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Primary Meta -->
 <title>APES — The Operating System for Commercial Airspace Protection</title>
-<meta name="description" content="APES is designing the first platform to close the full aerial protection loop — sense, decide, and respond — for civilian and commercial environments. Hardware-agnostic. Jurisdiction-adaptive. Pre-seed stage.">
+<meta name="description" content="APES is designing the first platform to close the full aerial protection loop — sense, decide, and respond — for civilian and commercial environments.">
 <meta name="keywords" content="drone protection, counter-UAV, airspace security, commercial drone defence, aerial threat response, critical infrastructure protection, APES">
 <meta name="author" content="APES — Aerial Protection & Engagement System">
 <meta name="robots" content="index, follow">
-
-<!-- Open Graph / Social -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://getapes.github.io/landing/">
 <meta property="og:title" content="APES — From Detection to Response. One Platform. Fully Autonomous.">
 <meta property="og:description" content="The first platform designed to close the full aerial protection loop for civilian and commercial environments. Sense. Decide. Act.">
 <meta property="og:image" content="https://getapes.github.io/landing/assets/img/og-image.svg">
-
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="APES — The Operating System for Commercial Airspace Protection">
 <meta name="twitter:description" content="From detection to autonomous response. One platform for civilian airspace security.">
 <meta name="twitter:image" content="https://getapes.github.io/landing/assets/img/og-image.svg">
-
-<!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
-
-<!-- Canonical -->
 <link rel="canonical" href="https://getapes.github.io/landing/">
-
-<!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Site CSS -->
 <link rel="stylesheet" href="./assets/css/style.css">
+</head>
 </head>
 <body>
 
@@ -255,91 +240,19 @@
   </div>
 </section>
 
-<!-- ══════════════ ENGAGEMENT SCENARIO ══════════════ -->
+<!-- ══════════════ HOW IT WORKS — LINKS TO SCENARIO ══════════════ -->
 <div class="divider"></div>
-<section class="scenario-section" id="scenario">
+<section style="padding:7rem 0;background:var(--apes-black);position:relative;overflow:hidden" id="scenario">
+  <div style="position:absolute;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,var(--apes-accent-dim),transparent 70%);bottom:-150px;left:-100px;pointer-events:none"></div>
   <div class="container">
-    <div class="text-center mb-4 reveal">
+    <div class="text-center reveal">
       <span class="section-label">How It Works</span>
       <h2 class="section-title">One threat. <span class="accent">Full autonomous response.</span></h2>
-      <p class="section-sub mx-auto">A complete engagement cycle — from an approaching FPV drone to autonomous interception. Every step logged. Every decision auditable.</p>
-    </div>
-
-    <div class="tactical-wrapper reveal">
-      <!-- MAP -->
-      <div class="tactical-map-container">
-        <div class="tactical-map">
-          <div class="perimeter perimeter-outer"></div>
-          <div class="perimeter perimeter-mid"></div>
-          <div class="perimeter perimeter-inner"></div>
-
-          <div class="perimeter-label pl-outer">Outer Perimeter</div>
-          <div class="perimeter-label pl-mid">Alert Zone</div>
-          <div class="perimeter-label pl-inner">Protected Zone</div>
-
-          <div class="tactical-sweep"></div>
-
-          <div class="factory">
-            <div class="factory-icon">&#127981;</div>
-            <div class="factory-label">Facility</div>
-          </div>
-
-          <div class="infra infra-1"><div class="infra-label">Substation</div></div>
-          <div class="infra infra-2"><div class="infra-label">Storage</div></div>
-          <div class="infra infra-3"></div>
-          <div class="infra infra-4"></div>
-
-          <div class="threat-drone">
-            <div class="threat-drone-icon"></div>
-            <div class="threat-label">FPV Threat</div>
-          </div>
-
-          <div class="interceptor-drone">
-            <div class="interceptor-icon"></div>
-            <div class="interceptor-label">Interceptor</div>
-          </div>
-
-          <div class="detect-ring"></div>
-          <div class="neutralize-burst"></div>
-
-          <div class="phase-log">
-            <div class="phase-pill p-scan">&#9678; Scanning</div>
-            <div class="phase-pill p-detect">&#9888; Detected</div>
-            <div class="phase-pill p-classify">&#9881; Classified</div>
-            <div class="phase-pill p-intercept">&#9889; Intercepting</div>
-            <div class="phase-pill p-neutral">&#10003; Neutralised</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NARRATIVE -->
-      <div class="scenario-narrative">
-        <div class="narrative-step step-scan">
-          <div class="step-phase">Sense — Scanning</div>
-          <h4>Continuous airspace monitoring</h4>
-          <p>Multi-sensor array scans all perimeters. RF, optical, and radar data fused into a unified stream. No blind spots.</p>
-        </div>
-        <div class="narrative-step step-detect">
-          <div class="step-phase">Sense — Detection</div>
-          <h4>FPV drone detected at outer perimeter</h4>
-          <p>An unidentified object crosses the outer perimeter. Sensor fusion confirms aerial target. Alert triggered immediately.</p>
-        </div>
-        <div class="narrative-step step-classify">
-          <div class="step-phase">Decide — Classification</div>
-          <h4>Threat classified: hostile FPV</h4>
-          <p>AI engine analyses type, flight behaviour, and intent. Object classified as hostile FPV drone. Policy engine determines response tier.</p>
-        </div>
-        <div class="narrative-step step-intercept">
-          <div class="step-phase">Act — Interception</div>
-          <h4>Interceptor drone launched</h4>
-          <p>Autonomous interceptor dispatched from the facility. Pursuit trajectory calculated. Target tracked in real time.</p>
-        </div>
-        <div class="narrative-step step-neutral">
-          <div class="step-phase">Act — Neutralised</div>
-          <h4>Threat neutralised. Audit complete.</h4>
-          <p>Interceptor engages and disables the threat before it reaches the alert zone. Full event logged to immutable audit trail.</p>
-        </div>
-      </div>
+      <p class="section-sub mx-auto" style="margin-bottom:2.5rem">Walk through a complete engagement — from first detection to autonomous interception. Five phases, each with its own tactical view.</p>
+      <a href="scenario.html" class="btn-primary-apes" style="font-size:0.78rem">
+        Launch Interactive Scenario
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12L12 5M12 5H6M12 5V11"/></svg>
+      </a>
     </div>
   </div>
 </section>
