@@ -49,7 +49,7 @@
 </nav>
 
 <!-- ══════════════ HERO ══════════════ -->
-<section class="hero">
+<section class="hero" id="hero">
   <div class="hero-grid-bg"></div>
   <div class="hero-glow"></div>
   <div class="container">
@@ -100,7 +100,7 @@
 
 <!-- ══════════════ THE OPPORTUNITY ══════════════ -->
 <div class="divider"></div>
-<section class="opportunity-section">
+<section class="opportunity-section" id="opportunity">
   <div class="container">
     <div class="text-center mb-5 reveal">
       <span class="section-label">The Opportunity</span>
@@ -497,8 +497,88 @@
   </div>
 </footer>
 
+<!-- Next section button -->
+<div id="nextBtn" style="position:fixed;bottom:24px;left:24px;z-index:200;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--apes-mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--apes-accent);padding:10px 16px;border:1px solid rgba(0,229,160,0.15);border-radius:2px;background:rgba(10,10,12,0.85);backdrop-filter:blur(12px);transition:all 0.3s;user-select:none" onclick="goNext()">
+  <span id="nextLabel">Next</span>
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(90deg)"><path d="M4 6l4 4 4-4"/></svg>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+// Section order for presentation navigation
+var sections = ['hero','opportunity','vision','architecture','scenario','progress','team','involved','contact'];
+var currentSection = 0;
+
+function updateNextBtn() {
+  var label = document.getElementById('nextLabel');
+  var btn = document.getElementById('nextBtn');
+  if (currentSection >= sections.length - 1) {
+    label.textContent = 'Back to top';
+    btn.querySelector('svg').style.transform = 'rotate(-90deg)';
+  } else {
+    var names = {
+      hero: 'Next: The Opportunity',
+      opportunity: 'Next: Vision',
+      vision: 'Next: Architecture',
+      architecture: 'Next: Live Demo',
+      scenario: 'Next: Progress',
+      progress: 'Next: Team',
+      team: 'Next: Get Involved',
+      involved: 'Next: Contact'
+    };
+    label.textContent = names[sections[currentSection]] || 'Next';
+    btn.querySelector('svg').style.transform = 'rotate(90deg)';
+  }
+}
+
+function goNext() {
+  if (currentSection >= sections.length - 1) {
+    currentSection = 0;
+  } else {
+    currentSection++;
+  }
+  var target = document.getElementById(sections[currentSection]);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  updateNextBtn();
+}
+
+// Track which section is visible to keep the button in sync
+var sectionObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      var id = entry.target.id;
+      var idx = sections.indexOf(id);
+      if (idx !== -1) {
+        currentSection = idx;
+        updateNextBtn();
+      }
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) sectionObserver.observe(el);
+});
+
+// Hover effect
+var nextBtn = document.getElementById('nextBtn');
+nextBtn.addEventListener('mouseover', function() { this.style.borderColor = 'rgba(0,229,160,0.4)'; });
+nextBtn.addEventListener('mouseout', function() { this.style.borderColor = 'rgba(0,229,160,0.15)'; });
+
+// Keyboard shortcut: spacebar or right arrow advances
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.code === 'Space' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    goNext();
+  }
+});
+
+updateNextBtn();
+
 // Reveal on scroll
 try {
   var obs = new IntersectionObserver(function(entries) {
@@ -508,7 +588,6 @@ try {
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
 } catch(e) {
-  // Fallback: show everything if observer fails
   document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
 }
 
@@ -518,7 +597,7 @@ window.addEventListener('scroll', function() {
   if (nav) nav.style.padding = window.scrollY > 50 ? '0.45rem 0' : '0.85rem 0';
 });
 
-// Smooth scroll
+// Smooth scroll for nav links
 document.querySelectorAll('a[href^="#"]').forEach(function(a) {
   a.addEventListener('click', function(e) {
     e.preventDefault();
