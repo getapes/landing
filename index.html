@@ -318,19 +318,19 @@ body::before {
 
 .hero-overline {
   font-family:var(--apes-mono);font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;
-  color:var(--apes-accent);margin-bottom:1.5rem;opacity:0;animation:fadeUp 0.8s 0.2s forwards;
+  color:var(--apes-accent);margin-bottom:1.1rem;opacity:0;animation:fadeUp 0.8s 0.2s forwards;
 }
 .hero-headline {
-  font-size:clamp(2.6rem,6vw,4.8rem);font-weight:800;line-height:1.04;letter-spacing:-0.03em;
-  margin-bottom:1.5rem;opacity:0;animation:fadeUp 0.8s 0.35s forwards;
+  font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;line-height:1.08;letter-spacing:-0.03em;
+  margin-bottom:1.1rem;opacity:0;animation:fadeUp 0.8s 0.35s forwards;
 }
 .hero-headline .highlight {
   background:linear-gradient(135deg,var(--apes-accent),#00b8d4);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 .hero-sub {
-  font-size:1.1rem;color:var(--apes-muted);line-height:1.75;max-width:540px;
-  margin-bottom:2.5rem;opacity:0;animation:fadeUp 0.8s 0.5s forwards;
+  font-size:1.02rem;color:var(--apes-muted);line-height:1.7;max-width:540px;
+  margin-bottom:2rem;opacity:0;animation:fadeUp 0.8s 0.5s forwards;
 }
 .hero-actions {
   display:flex;gap:1rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.8s 0.65s forwards;
@@ -394,7 +394,7 @@ body::before {
 .radar-label.lbl-act{bottom:10%;right:8%;color:var(--apes-red);border:1px solid rgba(255,77,106,0.3)}
 
 /* ── OPPORTUNITY ── */
-.opportunity-section{padding:7rem 0;background:var(--apes-dark)}
+.opportunity-section{padding:5rem 0;background:var(--apes-dark)}
 
 .problem-text {
   font-size:1.12rem;color:var(--apes-muted);line-height:1.8;max-width:700px;
@@ -404,7 +404,7 @@ body::before {
 .gap-cards{margin-top:3rem}
 .gap-card {
   background:var(--apes-card);border:1px solid var(--apes-border);border-radius:4px;
-  padding:1.8rem;height:100%;transition:all 0.35s;position:relative;overflow:hidden;
+  padding:1.4rem 1.6rem;height:100%;transition:all 0.35s;position:relative;overflow:hidden;
 }
 .gap-card::before {
   content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--apes-red);
@@ -444,7 +444,7 @@ body::before {
 .vm-card h3{font-size:1.25rem;font-weight:700;line-height:1.45}
 
 /* ── ARCHITECTURE ── */
-.arch-section{padding:7rem 0;background:var(--apes-dark)}
+.arch-section{padding:5rem 0;background:var(--apes-dark)}
 
 .arch-card {
   background:var(--apes-card);border:1px solid var(--apes-border);border-radius:4px;
@@ -673,6 +673,22 @@ body::before {
 /* ── FAQ SECTION ── */
 .faq-section{padding:7rem 0;background:var(--apes-black)}
 
+/* ── FLOATING NEXT BUTTON ── */
+.scroll-next {
+  position:fixed;bottom:2rem;right:2rem;z-index:999;
+  font-family:var(--apes-mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--apes-text);background:rgba(22,22,26,0.6);
+  border:1px solid var(--apes-border);border-radius:2px;
+  padding:0.55rem 0.9rem;cursor:pointer;
+  display:flex;align-items:center;gap:0.45rem;
+  opacity:0.4;transition:opacity 0.3s,background 0.3s,border-color 0.3s;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  text-decoration:none;
+}
+.scroll-next:hover{opacity:1;border-color:var(--apes-accent);color:var(--apes-accent);background:rgba(22,22,26,0.85)}
+.scroll-next svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.scroll-next.hidden{opacity:0;pointer-events:none}
+
 .faq-item {
   background:var(--apes-card);border:1px solid var(--apes-border);border-radius:4px;
   margin-bottom:0.75rem;overflow:hidden;transition:all 0.3s;
@@ -702,7 +718,7 @@ body::before {
 }
 </style>
 <!-- Fallback: show all content when JS is disabled (AI crawlers, accessibility) -->
-<noscript><style>.reveal{opacity:1!important;transform:none!important}.faq-answer{max-height:none!important;padding:0 1.8rem 1.4rem 1.8rem!important}.hero-overline,.hero-headline,.hero-sub,.hero-actions,.stage-badge,.hero-visual{opacity:1!important;animation:none!important}</style></noscript>
+<noscript><style>.reveal{opacity:1!important;transform:none!important}.faq-answer{max-height:none!important;padding:0 1.8rem 1.4rem 1.8rem!important}.hero-overline,.hero-headline,.hero-sub,.hero-actions,.hero-visual{opacity:1!important;animation:none!important}</style></noscript>
 </head>
 <body itemscope itemtype="https://schema.org/WebPage">
 
@@ -756,14 +772,6 @@ body::before {
             Get in Touch
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12L12 5M12 5H6M12 5V11"/></svg>
           </a>
-          <a href="#architecture" class="btn-ghost-apes">
-            See Our Approach
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M8 13l4-4M8 13l-4-4"/></svg>
-          </a>
-        </div>
-        <div class="stage-badge">
-          <div class="stage-dot"></div>
-          Pre-seed &nbsp;·&nbsp; Architecture complete &nbsp;·&nbsp; Working toward first PoC
         </div>
       </div>
       <div class="col-lg-5 d-none d-lg-block">
@@ -789,16 +797,18 @@ body::before {
 <div class="divider"></div>
 <section class="opportunity-section" aria-label="The market opportunity">
   <div class="container">
-    <div class="text-center mb-5 reveal">
+    <div class="text-center mb-4 reveal">
       <span class="section-label">The Opportunity</span>
       <h2 class="section-title">Commercial airspace has<br>no operating system. <span class="accent">Yet.</span></h2>
     </div>
-    <div class="row mb-4 reveal">
-      <div class="col-lg-8 mx-auto">
+    <div class="row g-4 mb-4 reveal">
+      <div class="col-lg-6">
         <p class="problem-text">
           Off-the-shelf drones are cheap, autonomous, and increasingly evasive. They cause <strong>operational shutdowns, espionage, safety incidents, and reputational damage</strong> across manufacturing, energy, logistics, and critical infrastructure.
         </p>
-        <p class="problem-text mt-3">
+      </div>
+      <div class="col-lg-6">
+        <p class="problem-text">
           Today's market is fragmented. Sensor vendors detect but don't decide. EW/ECM providers act narrowly and are circumvented by autonomous flight. Defence contractors are overengineered, classified-dependent, and inaccessible to commercial buyers. <strong>Nobody provides a closed-loop, automated system for the commercial world.</strong>
         </p>
       </div>
@@ -806,28 +816,24 @@ body::before {
     <div class="row g-3 gap-cards reveal">
       <div class="col-md-6 col-lg-3">
         <div class="gap-card">
-          <div class="gap-icon">&#9888;</div>
           <h4>Operational Downtime</h4>
           <p>Production halts, logistics delays, and facility closures caused by airspace incidents.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
         <div class="gap-card">
-          <div class="gap-icon">&#128065;</div>
           <h4>Espionage Risk</h4>
           <p>Unauthorized aerial reconnaissance targeting IP, processes, and sensitive operations.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
         <div class="gap-card">
-          <div class="gap-icon">&#9760;</div>
           <h4>Safety & Liability</h4>
           <p>Physical risk to personnel, with insurance and legal exposure escalating year-over-year.</p>
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
         <div class="gap-card">
-          <div class="gap-icon">&#128200;</div>
           <h4>Reputational Damage</h4>
           <p>Stakeholder confidence erodes after publicized security failures at protected sites.</p>
         </div>
@@ -868,7 +874,7 @@ body::before {
     <div class="text-center mb-5 reveal">
       <span class="section-label">Platform Architecture</span>
       <h2 class="section-title">Sense. Decide. Act.</h2>
-      <p class="section-sub mx-auto">The architecture is designed. Three layers, one compliance backbone. Hardware-agnostic and jurisdiction-adaptive from the ground up — built for global scale, not retrofitted for it.</p>
+      <p class="section-sub mx-auto" style="max-width:820px">Three layers. One continuous audit backbone. Every sensor consumed, every decision traced, every action compliant — designed for global scale from day one.</p>
     </div>
 
     <div class="row g-4 reveal">
@@ -1083,7 +1089,7 @@ body::before {
         <div class="audience-track t-prospects">
           <div class="track-label">For Operators</div>
           <h3>Become a PoC Partner</h3>
-          <p>We're looking for the right site to prove the platform end-to-end. If you manage critical infrastructure and aerial threats are a growing concern, we want to hear about your reality. PoC partners help shape the product and get priority access.</p>
+          <p>We're looking for the right site to prove the platform. If you manage critical infrastructure and drone threats are escalating, PoC partners shape the product and get priority access.</p>
           <a href="#contact" class="track-cta">
             Start a Conversation
             <svg class="cta-arrow" viewBox="0 0 14 14"><path d="M5 9l4-4M9 5H5.5M9 5v3.5"/></svg>
@@ -1094,7 +1100,7 @@ body::before {
         <div class="audience-track t-investors">
           <div class="track-label">For Investors</div>
           <h3>Back the OS</h3>
-          <p>We're building the operating system for a market that doesn't have one. The architecture is designed. The team is assembled. We're approaching seed to fund MVP and first deployment. Hardware-agnostic. Recurring SaaS per site.</p>
+          <p>The operating system for a market that doesn't have one. Architecture designed, team assembled, approaching seed. Hardware-agnostic. Recurring SaaS per site.</p>
           <a href="#contact" class="track-cta">
             Investor Briefing
             <svg class="cta-arrow" viewBox="0 0 14 14"><path d="M5 9l4-4M9 5H5.5M9 5v3.5"/></svg>
@@ -1105,7 +1111,7 @@ body::before {
         <div class="audience-track t-partners">
           <div class="track-label">For Tech Partners</div>
           <h3>Integrate Early</h3>
-          <p>Build sensors or effectors? APES is designed to make your hardware more valuable by embedding it in an intelligent workflow. Early integration partners shape the ecosystem and deploy everywhere the platform goes.</p>
+          <p>Build sensors or effectors? APES makes your hardware more valuable inside an intelligent workflow. Early partners shape the ecosystem.</p>
           <a href="#contact" class="track-cta">
             Partnership Inquiry
             <svg class="cta-arrow" viewBox="0 0 14 14"><path d="M5 9l4-4M9 5H5.5M9 5v3.5"/></svg>
@@ -1116,7 +1122,7 @@ body::before {
         <div class="audience-track t-talent">
           <div class="track-label">For Builders</div>
           <h3>Shape the Standard</h3>
-          <p>Real-time classification. Policy-driven automation. Multi-sensor fusion. Effector orchestration. If you want to build the platform that defines commercial airspace security from the ground up, we're hiring.</p>
+          <p>Real-time classification. Multi-sensor fusion. Effector orchestration. Build the platform that defines commercial airspace security. We're hiring.</p>
           <a href="#contact" class="track-cta">
             Join the Team
             <svg class="cta-arrow" viewBox="0 0 14 14"><path d="M5 9l4-4M9 5H5.5M9 5v3.5"/></svg>
@@ -1214,6 +1220,12 @@ body::before {
 
 <!-- ══════════════ FOOTER ══════════════ -->
 </main>
+
+<!-- Floating scroll-to-next-section button -->
+<a href="#" class="scroll-next" id="scrollNext" aria-label="Scroll to next section">
+  Next <svg viewBox="0 0 12 12"><path d="M6 2v8M6 10l3-3M6 10l-3-3"/></svg>
+</a>
+
 <footer class="footer" role="contentinfo">
   <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -1280,6 +1292,36 @@ document.querySelectorAll('.faq-question').forEach(function(btn) {
     }
   });
 });
+
+// Floating NEXT button — scrolls to next section
+(function() {
+  var sections = Array.from(document.querySelectorAll('section'));
+  var btn = document.getElementById('scrollNext');
+  if (!btn || !sections.length) return;
+
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    var scrollY = window.scrollY || window.pageYOffset;
+    var next = null;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].getBoundingClientRect().top > 80) {
+        next = sections[i];
+        break;
+      }
+    }
+    if (next) {
+      next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  // Hide when at the very bottom
+  function checkBottom() {
+    var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 120;
+    btn.classList.toggle('hidden', atBottom);
+  }
+  window.addEventListener('scroll', checkBottom);
+  checkBottom();
+})();
 </script>
 </body>
 </html>
