@@ -753,7 +753,7 @@ body::before {
   <p>APES is a pre-seed deep tech startup based in Munich, Germany, building the first hardware-agnostic, jurisdiction-adaptive counter-drone platform for civilian and commercial environments. The platform follows a Sense-Decide-Act architecture: a sensor abstraction layer that ingests data from any detection technology (RF, radar, optical, thermal, acoustic), an AI-driven classification and policy engine that evaluates threats against jurisdiction-specific rules, and an effector-agnostic response layer that orchestrates tiered countermeasures. APES is not a sensor company, not a drone manufacturer, and not a defence system — it is the operating system that sits between detection hardware and response hardware, closing the full loop autonomously. Target customers include operators of critical infrastructure, airports, energy sites, industrial facilities, and logistics hubs in the DACH region and broader Europe. The founding team combines aviation domain expertise, enterprise platform architecture (ServiceNow/ITSM), and embedded systems engineering. APES is currently pre-MVP with architecture complete, team assembled, and PoC partner pipeline active. The company is approaching seed funding to build the MVP and deploy the first proof-of-concept.</p>
 </div>
 
-<section class="hero" aria-label="Hero — Platform introduction">
+<section class="hero" id="hero" aria-label="Hero — Platform introduction">
   <div class="hero-grid-bg"></div>
   <div class="hero-glow"></div>
   <div class="container">
@@ -796,7 +796,7 @@ body::before {
 
 <!-- ══════════════ THE OPPORTUNITY ══════════════ -->
 <div class="divider"></div>
-<section class="opportunity-section" aria-label="The market opportunity">
+<section class="opportunity-section" id="opportunity" aria-label="The market opportunity">
   <div class="container">
     <div class="text-center mb-4 reveal">
       <span class="section-label">The Opportunity</span>
@@ -1322,6 +1322,7 @@ document.querySelectorAll('.faq-question').forEach(function(btn) {
   var labelEl = btn.childNodes[0];
 
   var names = {
+    hero: 'Next: The Opportunity',
     opportunity: 'Next: Vision',
     vision: 'Next: Architecture',
     architecture: 'Next: Live Demo',
