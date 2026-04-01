@@ -733,6 +733,7 @@ body::before {
       <ul class="navbar-nav ms-auto me-3 align-items-lg-center">
         <li class="nav-item"><a class="nav-link" href="#vision">Vision</a></li>
         <li class="nav-item"><a class="nav-link" href="#architecture">Architecture</a></li>
+        <li class="nav-item"><a class="nav-link" href="#scenario">Scenario</a></li>
         <li class="nav-item"><a class="nav-link" href="#progress">Progress</a></li>
         <li class="nav-item"><a class="nav-link" href="#team">Team</a></li>
         <li class="nav-item"><a class="nav-link" href="#involved">Get Involved</a></li>
@@ -928,6 +929,23 @@ body::before {
       <div class="not-badge"><span>&#10005;</span> Not a defence system</div>
       <div class="not-badge"><span>&#10005;</span> Not a sensor company</div>
       <div class="not-badge"><span>&#10005;</span> Not consulting</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ HOW IT WORKS — SCENARIO ══════════════ -->
+<div class="divider"></div>
+<section style="padding:7rem 0;background:var(--apes-black);position:relative;overflow:hidden" id="scenario">
+  <div style="position:absolute;width:450px;height:450px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,0.02),transparent 70%);bottom:-150px;left:-100px;pointer-events:none"></div>
+  <div class="container">
+    <div class="text-center reveal">
+      <span class="section-label">How It Works</span>
+      <h2 class="section-title">One threat. <span class="accent">Full autonomous response.</span></h2>
+      <p class="section-sub mx-auto" style="margin-bottom:2.5rem">See how the platform handles a hostile FPV drone approaching a protected facility — from first sensor contact to autonomous neutralisation in under 15 seconds.</p>
+      <a href="scenario.html" class="btn-primary-apes" style="font-size:0.78rem">
+        Launch Interactive Scenario
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12L12 5M12 5H6M12 5V11"/></svg>
+      </a>
     </div>
   </div>
 </section>
@@ -1293,35 +1311,82 @@ document.querySelectorAll('.faq-question').forEach(function(btn) {
   });
 });
 
-// Floating NEXT button — scrolls to next section
+// Floating NEXT button — scrolls to next section with labels
 (function() {
-  var sections = Array.from(document.querySelectorAll('section'));
+  var sectionIds = [];
+  document.querySelectorAll('section[id]').forEach(function(s) { sectionIds.push(s.id); });
   var btn = document.getElementById('scrollNext');
-  if (!btn || !sections.length) return;
+  if (!btn || !sectionIds.length) return;
+
+  var currentIdx = 0;
+  var labelEl = btn.childNodes[0];
+
+  var names = {
+    opportunity: 'Next: Vision',
+    vision: 'Next: Architecture',
+    architecture: 'Next: Live Demo',
+    scenario: 'Next: Progress',
+    progress: 'Next: Team',
+    team: 'Next: Get Involved',
+    involved: 'Next: FAQ',
+    faq: 'Next: Contact',
+    contact: 'Back to top'
+  };
+
+  function updateLabel() {
+    var id = sectionIds[currentIdx];
+    var text = names[id] || 'Next';
+    if (currentIdx >= sectionIds.length - 1) text = 'Back to top';
+    // Update text node before the SVG
+    var textNode = btn.firstChild;
+    if (textNode && textNode.nodeType === 3) {
+      textNode.textContent = text + ' ';
+    } else {
+      btn.insertBefore(document.createTextNode(text + ' '), btn.querySelector('svg'));
+    }
+  }
 
   btn.addEventListener('click', function(e) {
     e.preventDefault();
-    var scrollY = window.scrollY || window.pageYOffset;
-    var next = null;
-    for (var i = 0; i < sections.length; i++) {
-      if (sections[i].getBoundingClientRect().top > 80) {
-        next = sections[i];
-        break;
-      }
+    if (currentIdx >= sectionIds.length - 1) {
+      currentIdx = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      currentIdx++;
+      var target = document.getElementById(sectionIds[currentIdx]);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    if (next) {
-      next.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    updateLabel();
   });
 
-  // Hide when at the very bottom
+  // Sync with manual scrolling
+  var syncObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var idx = sectionIds.indexOf(entry.target.id);
+        if (idx !== -1) { currentIdx = idx; updateLabel(); }
+      }
+    });
+  }, { threshold: 0.3 });
+  sectionIds.forEach(function(id) { var el = document.getElementById(id); if (el) syncObs.observe(el); });
+
+  // Keyboard: spacebar or right arrow
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.code === 'Space' || e.key === 'ArrowRight') { e.preventDefault(); btn.click(); }
+  });
+
+  // Hide at very bottom
   function checkBottom() {
     var atBottom = (window.innerHeight + window.scrollY) >= document.body.scrollHeight - 120;
-    btn.classList.toggle('hidden', atBottom);
+    btn.style.opacity = atBottom ? '0' : '1';
+    btn.style.pointerEvents = atBottom ? 'none' : 'auto';
   }
   window.addEventListener('scroll', checkBottom);
   checkBottom();
+  updateLabel();
 })();
 </script>
 </body>
 </html>
+ 
